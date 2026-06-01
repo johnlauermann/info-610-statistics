@@ -1,14 +1,11 @@
-# Lab 4: Scatterplots & correlation
+
+# Lab 4: Scatterplots & correlation ---------------------------------------
+
 
 # we'll use these libraries
-library(corrplot)
-library(dplyr)
-library(ggplot2)
-library(here)
-
-#set up your working directory 
-here::i_am("Lab_04.r")
-
+library(dplyr)    # data management
+library(ggplot2)  # data visualization  
+library(corrplot) # correlation plots
 
 
 # Download and prepare data from the Census
@@ -60,15 +57,20 @@ race <- race %>%
 
 ## join the data
 ### one option is to use merge(). By default, this will merge based on a shared column name.
-joined <- merge(poverty, race)
+joined <- merge(x= poverty, y = race)
 
 ### another is to use the join functions in dplyr, which give you more control (e.g. if the primary key columns are named different)
-joined <- left_join(poverty, race, by = "GEO_ID")
+joined <- left_join(x = poverty, y = race, by = "GEO_ID")
 
 
 
-# Q1: Create scatterplots
+
+# Q1: Create scatterplots -------------------------------------------------
+
+## create a matrix plot space
 par(mfrow = c(2, 4))
+
+## add the plots
 plot(x=joined$AIANpct, 
      y=joined$PovertyRate, 
      main = "Poverty by Race", 
@@ -144,7 +146,9 @@ ggplot(long_table, aes(x = Percentage, y = PovertyRate)) +
 
 
 
-# Part 2: Calculate correlations and derivative metrics
+
+# Part 2: Calculate correlations and derivative metrics -------------------
+
 cor.test(joined$Whitepct, joined$PovertyRate, method = "pearson")
 cor.test(joined$Blackpct, joined$PovertyRate, method = "pearson")
 cor.test(joined$AIANpct, joined$PovertyRate, method = "pearson")
@@ -154,7 +158,9 @@ cor.test(joined$Otherpct, joined$PovertyRate, method = "pearson")
 cor.test(joined$TwoOrMorepct, joined$PovertyRate, method = "pearson")
 
 
-# Part 3: Create a correlation matrix
+
+# Part 3: Create a correlation matrix -------------------------------------
+
 ## assemble relevant variables, then transform them into a matrix using corrplot
 percentages <- select(joined, PovertyRate, AIANpct, Asianpct, Blackpct,
                       NHPIpct, Otherpct, TwoOrMorepct, Whitepct)
