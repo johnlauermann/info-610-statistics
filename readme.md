@@ -8,7 +8,7 @@ This course introduces statistics and its applications in information profession
 The lab materials cover the following topics:
 
 _Interpreting Data Structures_
-- [Lab 1: Data Management in R](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_01.R)
+- [Lab 1: Data Management in R](Lab_01.R)
 - [Lab 2: Interpreting Descriptive Statistics](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_02.R)
 - [Lab 3: Histograms & Distributions](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_03.R)
 
