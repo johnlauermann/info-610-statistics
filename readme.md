@@ -9,19 +9,19 @@ The lab materials cover the following topics:
 
 _Interpreting Data Structures_
 - [Lab 1: Data Management in R](Lab_01.R)
-- [Lab 2: Interpreting Descriptive Statistics](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_02.R)
-- [Lab 3: Histograms & Distributions](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_03.R)
+- [Lab 2: Interpreting Descriptive Statistics](Lab_02.R)
+- [Lab 3: Histograms & Distributions](Lab_03.R)
 
 _Analyzing Linear Relationships_
-- [Lab 4: Scatterplots & Correlation](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_04.R)
-- [Lab 5: Simple Linear Regression](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_05.R)
-- [Lab 6: Multiple Linear Regression](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_06.R)
+- [Lab 4: Scatterplots & Correlation](Lab_04.R)
+- [Lab 5: Simple Linear Regression](Lab_05.R)
+- [Lab 6: Multiple Linear Regression](Lab_06.R)
 
 _Exploring Categories, Groups, and Clusters_
-- [Lab 7: Chi-squared tests](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_07.R)
-- [Lab 8: Binomial Logistic Regression](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_08.R)
-- [Lab 9: T-tests & ANOVA](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_09.R)
-- [Lab 10: k-means Cluster Analysis](https://github.com/johnlauermann/student-resources/blob/main/info-610-intro-to-statistics/Lab_10.R)
+- [Lab 7: Chi-squared tests](Lab_07.R)
+- [Lab 8: Binomial Logistic Regression](Lab_08.R)
+- [Lab 9: T-tests & ANOVA](Lab_09.R)
+- [Lab 10: k-means Cluster Analysis](Lab_10.R)
 
 
 ## How to use this material
