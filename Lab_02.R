@@ -1,9 +1,10 @@
 # Lab 2: descriptive statistics
 
 # in this lab, we'll use these libraries:
-library(dplyr)
-library(ggplot2)
-library(treemapify)
+library(dplyr)      # for data frame management
+library(readr)      # for data cleaning
+library(ggplot2)    # for designing data visualizations
+library(treemapify) # for tree maps
 
 
 #set up your working directory 
@@ -13,11 +14,20 @@ setwd("~/Documents/ClassData")  #example for a Mac
 # load your data from NYC Open Data
 ## Go to the City Payroll records, query for a fiscal year, and download. https://data.cityofnewyork.us/City-Government/Citywide-Payroll-Data-Fiscal-Year-/k397-673e/about_data 
 
+## load raw data
 dataraw <- read.csv("payroll.csv")
-data <- na.omit(dataraw)  
+
+## data cleaning
+data <- dataraw %>%
+  mutate(Regular.Gross.Paid = parse_number(Regular.Gross.Paid)) 
 
 
-#Part 1: descriptive statistics
+
+
+
+# Part 1: descriptive statistics ------------------------------------------
+
+
 mean(data$Regular.Gross.Paid)
 median(data$Regular.Gross.Paid)
 sd(data$Regular.Gross.Paid)
@@ -46,7 +56,10 @@ var(part_time$Regular.Gross.Paid)
 
 
 
-#Part 2: query subsets
+
+# Part 2: query subsets ---------------------------------------------------
+
+
 ## list unique values in a column
 unique(data$Agency.Name)
 
@@ -63,9 +76,13 @@ median(police$Regular.Gross.Paid)
 sd(police$Regular.Gross.Paid)
 var(police$Regular.Gross.Paid)
 
-## or you could use filter() from the dplyr library
+## or you could use filter() and summarize() from the dplyr library
 police <- data %>%
-  filter(Agency.Name == "POLICE DEPARTMENT")
+  filter(Agency.Name == "POLICE DEPARTMENT") %>%
+  summarize(mean = mean(Regular.Gross.Paid),
+            median = median(Regular.Gross.Paid),
+            sd = sd(Regular.Gross.Paid),
+            var = var(Regular.Gross.Paid))
 
 ## and try some kind of visualization
 hist(police$Regular.Gross.Paid)
@@ -74,8 +91,11 @@ ggplot(police,aes(x=Regular.Gross.Paid)) +
   theme_gray()
 
 
-# Part 3: compare means across groups
-## One option is to use the aggregate() function
+
+
+# Part 3: compare means across groups -------------------------------------
+
+# One option is to use the aggregate() function
 mean_by_agency <- aggregate(x = data$Regular.Gross.Paid,
                            by = list(data$Agency.Name),
                            FUN = mean)
@@ -92,10 +112,34 @@ summary_by_agency <- data %>%
             )
 print(summary_by_agency)
 
-## and include some data visualization
+# and include some data visualization
+## let's use ggplot. it runs on a layering structure called the 'grammar of graphics' (hence, gg)
+## define plot space
+ggplot()
+
+## add data
+ggplot(data = summary_by_agency)
+
+## map variables to plot space
+ggplot(data = summary_by_agency, 
+       aes(area = total_pay, fill = median_pay, label = Agency.Name))
+
+## add the chart type
+ggplot(data = summary_by_agency, 
+       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +  ## + is layering operator. it works kind of like %>% in dplyr
+  geom_treemap() 
+
+
+## define some colors
 ggplot(data = summary_by_agency, 
        aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
   geom_treemap() +
-  geom_treemap_text(colour = "white", grow = TRUE)
-  scale_color_viridis_b()
+  geom_treemap_text(colour = "white", grow = TRUE) 
 
+## add labels
+ggplot(data = summary_by_agency, 
+       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", grow = TRUE) + 
+  labs(title = "Public Salaries in NYC", 
+       subtitle = "Median Salary by Agency") 
