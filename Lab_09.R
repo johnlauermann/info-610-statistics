@@ -1,10 +1,12 @@
-# Lab 9: t-tests and ANOVA
+
+# Lab 9: t-tests and ANOVA ------------------------------------------------
 
 library(dplyr)
 library(lsr)
 library(stringr)
 library(tidyverse)
 library(tidycensus)
+
 
 # load data from Census API
 ## sign up for a Census API key at https://api.census.gov/data/key_signup.html
@@ -55,7 +57,8 @@ mean(data$PovertyRate)  #now it works!
 
 
 
-# Question 1) run t-tests to compare two groups
+
+# Question 1) run t-tests to compare two groups ---------------------------
 ## for this test, you need two groups. For example, you could use the NY and NJ data frames as separate groups. 
 ## I'm going to create a new grouping variable based on whether a tract is suburban or inner city. 
 
@@ -72,6 +75,7 @@ data$PlaceType <- ifelse(grepl("Richmond", data$NAME), "City", data$PlaceType)
 
 city <- data[data$PlaceType == "City", ]
 suburb <- data[data$PlaceType == "Suburb", ]
+
 
 ## check whether the two groups satisfy assumptions for t-tests
 ## see here for a summary of assumptions: https://www.statology.org/t-test-assumptions/
@@ -93,8 +97,6 @@ var(city$UnemploymentRate)
 var(suburb$UnemploymentRate)
 var(city$Bachpct)
 var(suburb$Bachpct)
-
-
 
 ## run the t-tests to compare variable values in each group
 t.test(x = city$PovertyRate,       # group 1 sample mean
@@ -128,7 +130,6 @@ t.test(data$PovertyRate[data$PlaceType == "City"],
        var.equal = FALSE,
        conf.level = .95)
 
-
 ## assess the effect sizes using cohens D (you'll need the lsr library)
 ### for more on Cohen's D, see https://statisticsbyjim.com/basics/cohens-d/ 
 cohensD(city$PovertyRate, suburb$PovertyRate)
@@ -137,7 +138,7 @@ cohensD(city$Bachpct, suburb$Bachpct)
 
 
 
-# Question 2) ANOVA to compare across three or more groups
+# Question 2) ANOVA to compare across three or more groups ----------------
 #again, you'll need a grouping variable. 
 #In my case, I'm going to subset the five boroughs of NYC, and use each borough as a group. 
 
@@ -150,7 +151,6 @@ one.way.unemployement <- aov(UnemploymentRate ~ County, data = city)
 summary(one.way.unemployement)
 one.way.bach <- aov(Bachpct ~ County, data = city)
 summary(one.way.bach)
-
 
 #the ANOVA will tell you whether there is a difference across all of the groups,
 #without explaining where the differences occur. 
