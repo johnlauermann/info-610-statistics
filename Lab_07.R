@@ -1,28 +1,36 @@
-# Lab 7: Chi-squared tests
 
-## Explore the Stanford Open Policing Project database of police traffic stops (https://openpolicing.stanford.edu/data/). Then:
-## Pick a location and download the relevant dataset. 
+# Lab 7: Chi-squared tests ------------------------------------------------
+
+
+
+## Explore the Stanford Open Policing Project database of police traffic stops (https://openpolicing.stanford.edu/data/). 
+## Then pick a location and download the relevant dataset. 
 ## Import to R, so we can run categorical tests.
 
-## define workspace
-wd <- getwd()
-setwd(wd)
+# Set your working directory
+setwd("C:/Users/YourName/Documents/ClassData")  #example for a PC
+setwd("~/Documents/ClassData")  #example for a Mac
 
-## here's a method to download data files directly in the script
+
+# here's a method to download data files directly in the script
 url <- "https://stacks.stanford.edu/file/druid:yg821jf8611/yg821jf8611_ri_statewide_2020_04_01.rds"
 download.file(url = url, destfile = "RI_statewide_2020.rds")
 
-## load data
+
+# load data
 data <- readRDS("RI_statewide_2020.rds")
 
-## verify shape of data
+# verify shape of data
 dim(data)
 ls(data)
 str(data)
 
 
-# Q2: chi-squared tests
-## a basic chi-squared test will assess whether there are differences across groups
+
+
+# Q2: chi-squared tests ---------------------------------------------------
+
+# a basic chi-squared test will assess whether there are differences across groups
 ## start by exploring the data
 table(data$frisk_performed, data$subject_race)
 
@@ -32,7 +40,10 @@ print(friskbyrace)
 summary(friskbyrace)
 
 
-# Q3: contingency tables
+
+
+# Q3: contingency tables --------------------------------------------------
+
 friskbyrace$observed #the actual observed counts by category pairs
 friskbyrace$expected  #the expected counts by category pairs, based on probabilities
 friskbyrace$residuals   #positive suggests that observed is greater than expected, large indicate larger deviations from expected
@@ -40,14 +51,16 @@ friskbyrace$stdres
 
 
 
-# Q4: odds ratios and Fisher test
 
-data$subject_iswhite <- ifelse(data$subject_race == "white", "yes", "no") #calculate a simpler race variable, since my machine was crashing 
+# Q4: odds ratios and Fisher test -----------------------------------------
 
-fisher.test(data$frisk_performed, data$subject_iswhite) # fisher test will calculate the odds ratio
+#calculate a simpler race variable, since my machine was crashing 
+data$subject_iswhite <- ifelse(data$subject_race == "white", "yes", "no") 
 
+# fisher test will calculate the odds ratio
+fisher.test(data$frisk_performed, data$subject_iswhite) 
 
+# and the same for a different group
 data$subject_ishispanic <- ifelse(data$subject_race == "hispanic", "yes", "no")
-
 friskbyhispanic <- chisq.test(data$frisk_performed, data$subject_iswhite)
 
