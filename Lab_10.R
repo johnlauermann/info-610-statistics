@@ -1,12 +1,11 @@
-# Lab 10: k-means cluster analysis
 
-## see also this tutorial: https://uc-r.github.io/kmeans_clustering
+# Lab 10: k-means cluster analysis ----------------------------------------
 
-library(tidyverse)
-library(tidycensus)
-library(dplyr)
-library(cluster)
-library(factoextra)
+library(tidyverse)  # dependency for tidycensus
+library(tidycensus) # census api
+library(dplyr)      # data management
+library(cluster)    # cluster analysis
+library(factoextra) # visualizations
 
 
 # load data
@@ -37,8 +36,10 @@ data <- data %>% select(c(Bachpct, MedConRent, MedHomeValue, Postgradpct,
 data <- na.omit(data)
 
 
-# Question 1: what variables did you choose and why?
-## visualizing data
+
+
+# Question 1: what variables did you choose and why? ----------------------
+# visualizing data
 ## scatterplot pairs
 pairs(data, 
       na.action = na.omit, 
@@ -52,53 +53,34 @@ fviz_dist(distance,
 
 
 
-# Question 2: cluster analysis
-## cluster analysis, moving through each value of k
-k2 <- kmeans(data, centers = 2, nstart = 25)
-k3 <- kmeans(data, centers = 3, nstart = 25)
-k4 <- kmeans(data, centers = 4, nstart = 25)
-k5 <- kmeans(data, centers = 5, nstart = 25)
-k6 <- kmeans(data, centers = 6, nstart = 25)
-k7 <- kmeans(data, centers = 7, nstart = 25)
-k8 <- kmeans(data, centers = 8, nstart = 25)
-k9 <- kmeans(data, centers = 9, nstart = 25)
-k10 <- kmeans(data, centers = 10, nstart = 25)
 
-## print the results
-k2
-k3
-k4
-k5
-k6
-k7
-k8
-k9
-k10
-
-## or use a for loop to automate the process
-kvalues <- 2:10
-for(k in kvalues){
-  kmodel <- paste0("k", k)
-  kmodel <- assign(kmodel, kmeans(data, centers = k, nstart = 25))
-  print(kmodel)
-}
-
-
-# Question 3: various kinds of elbow plots to assess optimal value of k
+# Question 2: find value of k --------------------------------------------
+# various kinds of elbow plots to assess optimal value of k
 fviz_nbclust(data, kmeans, method = "wss")
-fviz_nbclust(data, kmeans, method = "silhouette")
-fviz_nbclust(data, kmeans, method = "gap_stat")
 
 
 
-# Question 4: visualize the clusters
-fviz_cluster(k2, data = data, geom = "point", main = "k = 2", ggtheme = theme_minimal())
-fviz_cluster(k3, data = data, geom = "point", main = "k = 3", ggtheme = theme_minimal())
+
+# Question 3: interpret cluster anlaysis ----------------------------------
+# define cluster
+k4 <- kmeans(data, centers = 4, nstart = 25)
+
+# see results
+k4
+
+# see the individual component options
+names(k4)
+
+## call individual components
+k4$size
+k4$centers
+k4$betweenss
+k4$withinss
+k4$totss
+
+
+
+
+# Question 4: visualize the clusters --------------------------------------
+
 fviz_cluster(k4, data = data, geom = "point", main = "k = 4", ggtheme = theme_minimal())
-fviz_cluster(k5, data = data, geom = "point", main = "k = 5", ggtheme = theme_minimal())
-fviz_cluster(k6, data = data, geom = "point", main = "k = 6", ggtheme = theme_minimal())
-fviz_cluster(k7, data = data, geom = "point", main = "k = 7", ggtheme = theme_minimal())
-fviz_cluster(k8, data = data, geom = "point", main = "k = 8", ggtheme = theme_minimal())
-fviz_cluster(k9, data = data, geom = "point", main = "k = 9", ggtheme = theme_minimal())
-fviz_cluster(k9, data = data, geom = "point", main = "k = 9", ggtheme = theme_minimal())
-fviz_cluster(k10, data = data, geom = "point", main = "k = 10", ggtheme = theme_minimal())
