@@ -1,89 +1,80 @@
 # Lab 8: logistic regression
 
-library(dplyr)
-library(ggplot2)
-library(leaflet)
+library(dplyr)    # data management
+library(haven)    # for reading SPSS data
+library(survey)   # for weigting survey data
 
 
 # load data
-## for this, we'll use the most recent URL to load Furman Center's Subsidized Housing Database
-url <- "https://furmancenter.org/files/CoreData/FC_SHD_bbl_analysis_2025-05-13.csv"
-data <- read.csv(url) 
+## for this, we'll use Pew ATP data: https://www.pewresearch.org/dataset/american-trends-panel-wave-161/
 
-## add one new variable
-data$assessed_value_perunit <- data$assessed_value / data$res_units
+# Set your working directory
+setwd("C:/Users/YourName/Documents/ClassData")  #example for a PC
+setwd("~/Documents/ClassData")  #example for a Mac
 
+# load raw data
+data_raw <- read_spss("C:/Users/johnl/My Drive (jlauerma@pratt.edu)/Teaching/INFO 610 Intro to Statistics/Lessons/11_logistic_regression/W161_Feb25/ATP W161.sav")
 
-
-# Q1: Define and justify your research question
-## In my case, what differentiates a 421a vs J51 building? 
-
-## basic data visualizations
-boxplot(year_built ~ prog_421a, 
-        data = data,
-        xlab = "421a Building",
-        ylab = "Year Built")
-
-boxplot(res_units ~ prog_421a, 
-        data = data,
-        xlab = "421a Building",
-        ylab = "Residential Units")
-
-boxplot(assessed_value ~ prog_421a, 
-        data = data,
-        xlab = "421a Building",
-        ylab = "Assessed Value ($)")
-
-boxplot(assessed_value_perunit ~ prog_421a, 
-        data = data,
-        xlab = "421a Building",
-        ylab = "Assessed Value ($ per unit)")
-
-boxplot(net_inc_sqft ~ prog_421a, 
-        data = data,
-        xlab = "421a Building",
-        ylab = "Net Rental Income ($ per sq.ft.)")
+# and weight the survey
+data_weighted <- svydesign(ids = ~0,
+                           data = data_raw,
+                           weights = ~WEIGHT_W161)
 
 
-## testing correlations, using Kendall's tau b/c data is categorical
-cor.test(data$prog_421a, data$year_built, method = "kendall")
-cor.test(data$prog_421a, data$res_units, method = "kendall")
-cor.test(data$prog_421a, data$assessed_value_perunit, method = "kendall")
-cor.test(data$prog_421a, data$net_inc_sqft, method = "kendall")
 
-## now just for fun, a map...
-options(viewer = NULL)
-map <- leaflet()
-map <- addTiles(map)
-map <- addProviderTiles(map, "Stadia.StamenToner")
+# Q1: Select and visualize variables --------------------------------------
 
-properties421a <- data %>%
-  filter(prog_421a == 1)
+# define variables of interest
+variables <- c("SATIS_W161", "F_CREGION", "F_USR_SELFID", "F_AGECAT", "F_GENDER",
+               "F_EDUCCAT", "F_HISP", "F_RACECMB", "F_MARITAL", "F_RELIGCAT1", 
+               "F_PARTYSUM_FINAL", "F_INTFREQ", "WEIGHT_W161")
 
-map <- addCircleMarkers(map,
-                      lng = properties421a$longitude,
-                      lat = properties421a$latitude,
-                      radius = 1.5,
-                      color = "blue"
-                      )
-map <- addLegend(map,
-               "topright",
-               colors = cols,
-               title = "Construction-Related Subsidies",
-               opacity = 1
-)
-map
+# define null codes
+null_codes <- c("9", "99")
+
+# filter and remove 'don't know/null/refused'
+data <- data_raw %>%
+  select(all_of(variables))
+
+# replace null codes with null
+data <- data %>%
+  mutate(across(
+    all_of(variables),
+    ~ifelse(as.character(.x) %in% null_codes, NA, .x))) 
+
+# remove null values and recode to 1/0 structure
+data <- data %>%
+  filter(!is.na(SATIS_W161)) %>%
+  mutate(SATIS_W161 = ifelse(SATIS_W161 == 1, 1, 0))
 
 
-# Q2: define and interpret logistic models with only one variable at a time
+
+
+# Q1: Define and justify your research question ---------------------------
+## In my case, what predicts whether a person is satisifed with direction of the country? 
+
+# testing correlations, using Spearman's rho b/c Y is categorical
+cor.test(data$SATIS_W161, data$F_AGECAT, method = "spearman")
+cor.test(data$SATIS_W161, data$F_GENDER, method = "spearman")
+cor.test(data$SATIS_W161, data$F_EDUCCAT, method = "spearman")
+cor.test(data$SATIS_W161, data$F_MARITAL, method = "spearman")
+cor.test(data$SATIS_W161, data$F_PARTYSUM_FINAL, method = "spearman")
+cor.test(data$SATIS_W161, data$F_INTFREQ, method = "spearman")
+
+
+
+
+# Q2: define and interpret logistic models with only one variable  --------
+
 ## define my predictors
-predictors <- c("year_built", "res_units", "net_inc_sqft", "assessed_value_perunit")
+predictors <- c("F_AGECAT", "F_GENDER", "F_EDUCCAT", "F_MARITAL", "F_PARTYSUM_FINAL", "F_INTFREQ")
+
 
 ## write a loop to test each predictor
 for (variable in predictors){
   
   ## build the formula
-  formula <- as.formula(paste("prog_421a ~", variable))
+  formula <- as.formula(paste("SATIS_W161 ~", variable))
   
   ## fit the model
   model <- glm(formula, data = data, family = "binomial")
@@ -104,9 +95,13 @@ for (variable in predictors){
 }
 
 
-# Q3: define and interpret a logistic model with all variables
+
+
+# Q3: define and interpret a logistic model with all variables ------------
+
 ## define the model
-log_model <- glm(prog_421a ~ year_built + res_units + net_inc_sqft + assessed_value_perunit, 
+log_model <- glm(SATIS_W161 ~ F_AGECAT + F_GENDER + F_EDUCCAT + F_MARITAL + 
+                   F_PARTYSUM_FINAL + F_INTFREQ, 
                  data = data, family = "binomial")
 
 ## print the results
@@ -121,3 +116,32 @@ exp(confint.default(log_model))
 anova(log_model, "Chisquare")
 
 
+
+
+# Bonus: weight it properly -----------------------------------------------
+## Survey data should be weighted. You don't have to for now. But if you wanted to, here's how. 
+
+# make sure Y is in a 1/0 structure
+data_raw <- data_raw %>%
+  mutate(SATIS_W161 = ifelse(SATIS_W161 == 1, 1, 0))
+
+# weight the data
+data_weighted <- svydesign(ids = ~0,
+                           data = data_raw,
+                           weights = ~WEIGHT_W161)
+
+# define the fomula
+logistic_formula <- as.formula(paste("SATIS_W161 ~", paste(predictors, collapse = " + ")))
+logistic_formula 
+
+# run the model
+design <- svydesign(ids = ~1, weights = ~WEIGHT, data = data)
+logistic_model_weighted <- svyglm(
+  formula = logistic_formula,
+  design = data_weighted,
+  family = quasibinomial())
+
+# see results
+summary(logistic_model_weighted)
+exp(coefficients(logistic_model_weighted))
+exp(confint.default(logistic_model_weighted))
