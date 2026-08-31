@@ -15,7 +15,7 @@ getwd()
 
 # Pull data from the NYC Street Tree Census (https://data.cityofnewyork.us/Environment/2015-Street-Tree-Census-Tree-Data/uvpi-gqnh/about_data)
 ## Download as a CSV to your working directory, then:
-data <- read.csv("alltrees.csv")
+data <- read.csv("alltrees.csv")  ## <- assigns the csv content to a temporary object we chose to name 'data'
 
 
 
@@ -36,16 +36,19 @@ dim(data)  ## or this gives both
 ## list the variables
 ls(data)
 
+## see the structure of the data
+str(data)
+
 ## identify the data types
-class(data$spc_common) ## use $ to reference a variable within the data frame
-sapply(data, class) ## for all variables, using sapply() to iterate through each column
+class(data$spc_common)        ## use $ to reference a variable within the data frame
+sapply(data, class)           ## for all variables, using sapply() to iterate through each column
 
 ## find unique values in a variable
 unique(data$spc_common)
 
 ## find null values using is.na()
-sum(is.na(data$spc_common))  ## for a single variable
-colSums(is.na(data))  ## for the entire data frame
+sum(is.na(data$spc_common))    ## for a single variable
+colSums(is.na(data))           ## for the entire data frame
 
 
 
@@ -55,8 +58,8 @@ colSums(is.na(data))  ## for the entire data frame
 install.packages("dplyr") ## if you need to install it...
 library(dplyr)
 
-## query the data from the web, download as a csv, then:
-ash <- data %>%               ## %>% is a 'pipe operator'. it means do this then continue to next command
+## query the data 
+ash <- data %>%                 ## %>% is a 'pipe operator'. it means do this then continue to next line
   filter(spc_common == "ash")   ## filter() returns rows that match your query
 
 ## create frequency and proportional tables
@@ -67,7 +70,7 @@ proportion <- prop.table(frequency)
 print(proportion)
 
 ## create a pivot table
-pivot <- ash %>%  ## The %>% is the 'pipe' operator. It means do this, then keep going.
+pivot <- ash %>%          ## The %>% is the 'pipe' operator. It means do this, then keep going.
   group_by(nta_name) %>%  ## group_by() groups all rows that match the query
   summarize(count = n())  ## summarize() can be any descriptive statistic on the group. I want the total count. 
 print(pivot)
@@ -93,15 +96,15 @@ barplot(health_summary$mean_dbh, names.arg = health_summary$health)
 # Part 3: Summarize your chosen borough -----------------------------------
 
 ## common species
-table(data$spc_common[data$borough == "Bronx"]) # [] will filter based on a query
+table(data$spc_common[data$borough == "Bronx"]) ## [] will filter based on a query
 
-## or with some dplyr syntax
+## or you can filter with some dplyr syntax
 bronx <- data %>%
   filter(borough == "Bronx") 
 
 pivot <- bronx %>%
-  group_by(spc_common) %>%
-  summarize(count = n()) %>%
+  group_by(spc_common) %>%        ## using the pipe operator, you can continue piping for as many lines as you need
+  summarize(count = n()) %>% 
   slice_max(n = 5, order_by = count)
 
 
