@@ -9,9 +9,6 @@
 setwd("C:/Users/YourName/Documents/ClassData")  #example for a PC
 setwd("~/Documents/ClassData")  #example for a Mac
 
-## and to double check...
-getwd()
-
 
 # Pull data from the NYC Street Tree Census (https://data.cityofnewyork.us/Environment/2015-Street-Tree-Census-Tree-Data/uvpi-gqnh/about_data)
 ## Download as a CSV to your working directory, then:
@@ -20,33 +17,32 @@ data <- read.csv("alltrees.csv")  ## <- assigns the csv content to a temporary o
 
 
 # Part 1: Explore dimensions of the data ----------------------------------
-
-## view data frame
+# view data frame
 View(data)
 
-## see only the first rows
+# see only the first rows
 head(data)
 head(data, 10) # this specifies how many first rows to view
 
-## count dimensions of the data
+# count dimensions of the data
 nrow(data)
 ncol(data)
 dim(data)  ## or this gives both
 
-## list the variables
+# list the variables
 ls(data)
 
-## see the structure of the data
+# see the structure of the data
 str(data)
 
-## identify the data types
+# identify the data types
 class(data$spc_common)        ## use $ to reference a variable within the data frame
 sapply(data, class)           ## for all variables, using sapply() to iterate through each column
 
-## find unique values in a variable
+# find unique values in a variable
 unique(data$spc_common)
 
-## find null values using is.na()
+# find null values using is.na()
 sum(is.na(data$spc_common))    ## for a single variable
 colSums(is.na(data))           ## for the entire data frame
 
@@ -54,38 +50,37 @@ colSums(is.na(data))           ## for the entire data frame
 
 # Part 2: Summarize data for a single species -----------------------------
 
-## for this, we'll import the dplyr library, which has more specialized data management tools
+# for this, we'll import the dplyr library, which has more specialized data management tools
 install.packages("dplyr") ## if you need to install it...
 library(dplyr)
 
-## query the data 
+# query the data 
 ash <- data %>%                 ## %>% is a 'pipe operator'. it means do this then continue to next line
   filter(spc_common == "ash")   ## filter() returns rows that match your query
 
-## create frequency and proportional tables
+# create frequency and proportional tables
 frequency <- table(ash$borough)
 print(frequency)
 
 proportion <- prop.table(frequency)
 print(proportion)
 
-## create a pivot table
+# create a pivot table
 pivot <- ash %>%          ## The %>% is the 'pipe' operator. It means do this, then keep going.
   group_by(nta_name) %>%  ## group_by() groups all rows that match the query
   summarize(count = n())  ## summarize() can be any descriptive statistic on the group. I want the total count. 
 print(pivot)
 
-## basic data visualizations
-### histograms, which show distribution of a single variable
+# basic data visualizations
+## histograms, which show distribution of a single variable
 hist(ash$tree_dbh)
 
-### descriptive statistics
+## descriptive statistics
 mean(ash$tree_dbh)
 median(ash$tree_dbh)
 quantile(ash$tree_dbh)
 
-
-### bar charts, which summarize counts by attribute
+## bar charts, which summarize counts by attribute
 health_summary <- ash %>%
   group_by(health) %>%
   summarize(mean_dbh = mean(tree_dbh))
@@ -95,10 +90,10 @@ barplot(health_summary$mean_dbh, names.arg = health_summary$health)
 
 # Part 3: Summarize your chosen borough -----------------------------------
 
-## common species
+# common species
 table(data$spc_common[data$borough == "Bronx"]) ## [] will filter based on a query
 
-## or you can filter with some dplyr syntax
+# or you can filter with some dplyr syntax
 bronx <- data %>%
   filter(borough == "Bronx") 
 
@@ -106,7 +101,6 @@ pivot <- bronx %>%
   group_by(spc_common) %>%        ## using the pipe operator, you can continue piping for as many lines as you need
   summarize(count = n()) %>% 
   slice_max(n = 5, order_by = count)
-
 
 # You're on your own for visualization, but here's one idea: a histogram. 
 ## basic setup
