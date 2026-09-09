@@ -2,7 +2,7 @@
 
 # we'll use these packages
 library(dplyr)  ## for data management 
-library(kim)  ## for calculating skewness and kurtosis metrics
+library(kim)    ## for calculating skewness and kurtosis metrics
 
 # set up your working directory
 # add your data
@@ -14,21 +14,25 @@ trips <- read.csv("tripv2pub.csv") %>%
 
 
 # Part 1: Present tables that summarize trip time or distance -------------
+## I created a new variable that classifies trips as more or less than 15 minutes
+trips$MinuteCategory <- ifelse(trips$TRVLCMIN >= 15, 1, 0) 
 
+## crosstabulated frequency table
+table(trips$TDWKND, trips$MinuteCategory) 
 
-trips$MinuteCategory <- ifelse(trips$TRVLCMIN >= 15, 1, 0) ## I created a new variable that classifies trips as more or less than 15 minutes
-table(trips$TDWKND, trips$MinuteCategory) ## crosstabulated frequency table
-prop.table(table(trips$TDWKND, trips$TRVLCMIN)) ## crosstabulated density table
+ ## crosstabulated proportional table
+prop.table(table(trips$TDWKND, trips$TRVLCMIN))
 
 
 
 # Part 2: Design histograms that descriptive trip time or distance --------
 
 ## one option is to use the hist() funciton in base R
-## partition the plot space into one row and two columns
+
+# partition the plot space into one row and two columns
 par(mfrow = c(1,2))  
 
-## then create the histograms 
+# then create the histograms 
 hist(trips$TRVLCMIN[trips$TDWKND == 2], 
      breaks = 250,  ## this parameter sets the bin sizes. More breaks = more bins, each covering a smaller range of the y axis. 
      xlim = range(0,120),
@@ -40,11 +44,26 @@ hist(trips$TRVLCMIN[trips$TDWKND == 1],
      main = "Weekend", xlab = "Minutes", ylab = "Trips", 
      col = "purple")
 
+# if you want to add mean lines, use the abline() function...
+hist(trips$TRVLCMIN[trips$TDWKND == 1], 
+     breaks = 250,
+     xlim = range(0,120),
+     main = "Weekend", xlab = "Minutes", ylab = "Trips", 
+     col = "purple")
+abline(v = mean(trips$TRVLCMIN[trips$TDWKND == 2], na.rm = TRUE), col = "orange")
+
+hist(trips$TRVLCMIN[trips$TDWKND == 2], 
+     breaks = 250,
+     xlim = range(0,120),
+     main = "Work Week", xlab = "Minutes", ylab = "Trips",
+     col = "yellow")
+abline(v = mean(trips$TRVLCMIN[trips$TDWKND == 2], na.rm = TRUE), col = "blue")
+
 
 
 # Part 3: Interpret distributions using mean, median, standard dev --------
 
-## basic descriptives
+# basic descriptives using base R tools
 mean(trips$TRVLCMIN[trips$TDWKND == 1], na.rm = TRUE)
 median(trips$TRVLCMIN[trips$TDWKND == 1], na.rm = TRUE)
 sd(trips$TRVLCMIN[trips$TDWKND == 1], na.rm = TRUE)
@@ -57,44 +76,34 @@ var(trips$TRVLCMIN[trips$TDWKND == 2], na.rm = TRUE)
 
 # or use dplyr to simplify this
 summary <- trips %>%
+  ## group by the categorical variable
   group_by(TDWKND) %>%
+
+  ## within each category, calculate summary statistics
   summarize(mean = mean(TRVLCMIN, na.rm = TRUE),
             median = median(TRVLCMIN, na.rm = TRUE),
             sd = sd(TRVLCMIN, na.rm = TRUE),
             var = var(TRVLCMIN, na.rm = TRUE)) %>%
+
+  ## and create a new variable
   mutate(
     TDWKND = case_when(
       TDWKND == 1 ~ "Weekend",
       TDWKND == 2 ~ "Work Week"))
+
 print(summary)
-
-## add mean lines to the histograms
-## then create the histograms 
-hist(trips$TRVLCMIN[trips$TDWKND == 2], 
-     breaks = 250,
-     xlim = range(0,120),
-     main = "Work Week", xlab = "Minutes", ylab = "Trips",
-     col = "yellow")
-abline(v = mean(trips$TRVLCMIN[trips$TDWKND == 2], na.rm = TRUE), col = "blue")
-
-hist(trips$TRVLCMIN[trips$TDWKND == 1], 
-     breaks = 250,
-     xlim = range(0,120),
-     main = "Weekend", xlab = "Minutes", ylab = "Trips", 
-     col = "purple")
-abline(v = mean(trips$TRVLCMIN[trips$TDWKND == 2], na.rm = TRUE), col = "orange")
-
 
 
 
 # Part 4: Calculate the skewness and kurtosis of the distributions --------
 
-## This calculates Pearson's Coefficient of Skewness. Directionality indicates left/right skew and magnititude quantifies the degree of the skew. 
+## This calculates Pearson's Coefficient of Skewness. 
+## Directionality indicates left/right skew and magnititude quantifies the degree of the skew. 
 skewness(trips$TRVLCMIN, type = "pearson_2")
 skewness(trips$TRVLCMIN[trips$TDWKND == 1], type = "pearson_2")
 skewness(trips$TRVLCMIN[trips$TDWKND == 2], type = "pearson_2")
 
-## This calculates Pearson's measure of kurtosis. Larger numbers indicate flatter distributions.
+## This calculates Pearson's measure of kurtosis. Larger numbers indicate peakier distributions.
 kurtosis(trips$TRVLCMIN)
 kurtosis(trips$TRVLCMIN[trips$TDWKND == 1])
 kurtosis(trips$TRVLCMIN[trips$TDWKND == 2])
