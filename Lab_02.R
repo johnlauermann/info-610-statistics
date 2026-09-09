@@ -6,6 +6,12 @@ library(readr)      # for data cleaning
 library(ggplot2)    # for designing data visualizations
 library(treemapify) # for tree maps
 
+## if you don't already have them, install using...
+install.packages("dplyr")
+install.packages("readr")
+install.packages("ggplot2")
+install.packages("treemapify")
+
 
 # set up your working directory 
 setwd("C:/Users/YourName/Documents/ClassData")  #example for a PC
@@ -13,13 +19,15 @@ setwd("~/Documents/ClassData")  #example for a Mac
 
 # load your data from NYC Open Data
 ## Go to the City Payroll records, query for a fiscal year, and download. 
-## Save it to your working directory. https://data.cityofnewyork.us/City-Government/Citywide-Payroll-Data-Fiscal-Year-/k397-673e/about_data 
+## Save it to your working directory. 
+## https://data.cityofnewyork.us/City-Government/Citywide-Payroll-Data-Fiscal-Year-/k397-673e/about_data 
 
 # load raw data
 dataraw <- read.csv("payroll.csv")
 
 # data cleaning
 data <- dataraw %>%
+  ## format the column as a number
   mutate(Regular.Gross.Paid = parse_number(Regular.Gross.Paid)) 
 
 
@@ -117,8 +125,9 @@ print(summary_by_agency)
 
 
 # and include some data visualization
-## let's use ggplot. 
+## let's use ggplot
 ## it runs on a layering structure called the 'grammar of graphics' (hence, gg)
+## the grammar follows this structure:
 
 # define plot space
 ggplot()
@@ -126,13 +135,14 @@ ggplot()
 # add data
 ggplot(data = summary_by_agency)
 
-# map variables to plot space
+# map variables to the plot space
 ggplot(data = summary_by_agency, 
        aes(area = total_pay, fill = median_pay, label = Agency.Name))
 
 # add the chart type
+## + is layering operator in ggplot. it works kind of like %>% in dplyr
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +  ## + is layering operator. it works kind of like %>% in dplyr
+       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +  
   geom_treemap() 
 
 
@@ -149,3 +159,13 @@ ggplot(data = summary_by_agency,
   geom_treemap_text(colour = "white", grow = TRUE) + 
   labs(title = "Public Salaries in NYC", 
        subtitle = "Median Salary by Agency") 
+
+# and add a theme
+## theme information available at https://ggplot2.tidyverse.org/reference/ggtheme.html
+ggplot(data = summary_by_agency, 
+       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
+  geom_treemap() +
+  geom_treemap_text(colour = "white", grow = TRUE) + 
+  labs(title = "Public Salaries in NYC", 
+       subtitle = "Median Salary by Agency") +
+  theme_minimal()
