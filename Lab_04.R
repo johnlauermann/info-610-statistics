@@ -1,23 +1,27 @@
 
 # Lab 4: Scatterplots & correlation ---------------------------------------
 
-
 # we'll use these libraries
-library(dplyr)    # data management
+library(dplyr)    # data management (queries & calculations)
+library(tidyr)    # data management (pivoting)
 library(ggplot2)  # data visualization  
 library(corrplot) # correlation plots
+library(tibble)   # more data management (pivot to rename)
 
 
 # Download and prepare data from the Census
 ## in my example, I'll test whether there's a correlation between poverty and race
 
-## poverty data come from variable S1701 (https://data.census.gov/table?q=S1701&g=010XX00US$0500000)
-poverty <- read.csv("Poverty-ACS20235yr.csv") %>%
+## poverty data come from variable S1701 (https://data.census.gov/table/ACSST5Y2024.S1701?q=S1701&g=010XX00US$0500000,$1400000&y=2024)
+poverty <- read.csv("Poverty_2024_ACS5yr.csv") %>%
+  ### only the columns I want
   select(GEO_ID, S1701_C03_046E) %>%
-  rename(PovertyRate = S1701_C03_046E)
+  ### this was reading as a character for me, so I'm forcing it as numeric
+  rename(PovertyRate = S1701_C03_046E) %>%
+  mutate(PovertyRate = as.numeric(PovertyRate))
 
-## race data come from variable B02001 (https://data.census.gov/table?q=b02001&g=010XX00US$0500000)
-race <- read.csv("Race-ACS20235yr.csv") %>%
+## race data come from variable B02001 (https://data.census.gov/table?q=b02001&g=010XX00US$0500000,$1400000&y=2024)
+race <- read.csv("Race_2024_ACS5yr.csv") %>%
   select(GEO_ID, B02001_001E, B02001_002E,
          B02001_003E, B02001_004E, B02001_005E,
          B02001_006E, B02001_007E, B02001_008E) %>%
@@ -53,7 +57,6 @@ race <- race %>%
     TwoOrMorepct = (TwoOrMore / Total) * 100,
     Whitepct = (White / Total) * 100
   )
-
 
 ## join the data
 ### one option is to use merge(). By default, this will merge based on a shared column name.
@@ -137,7 +140,7 @@ long_table <- joined %>%
 
 ### create the scatterplot matrix
 ggplot(long_table, aes(x = Percentage, y = PovertyRate)) +
-  geom_point(color = "darkred", alpha = 0.7) +
+  geom_point(color = "darkred", alpha = .7) +
   facet_wrap(~RaceLabel, scales = "free") +
   labs(title = "Poverty by Race",
        x = NULL,
