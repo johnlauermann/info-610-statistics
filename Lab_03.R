@@ -99,9 +99,9 @@ print(summary)
 
 ## This calculates Pearson's Coefficient of Skewness. 
 ## Directionality indicates left/right skew and magnititude quantifies the degree of the skew. 
-skewness(trips$TRVLCMIN, type = "pearson_2")
-skewness(trips$TRVLCMIN[trips$TDWKND == 1], type = "pearson_2")
-skewness(trips$TRVLCMIN[trips$TDWKND == 2], type = "pearson_2")
+skewness(trips$TRVLCMIN, type = "pearson_1")
+skewness(trips$TRVLCMIN[trips$TDWKND == 1], type = "pearson_1")
+skewness(trips$TRVLCMIN[trips$TDWKND == 2], type = "pearson_1")
 
 ## This calculates Pearson's measure of kurtosis. Larger numbers indicate peakier distributions.
 kurtosis(trips$TRVLCMIN)
