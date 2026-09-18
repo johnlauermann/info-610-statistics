@@ -137,35 +137,51 @@ ggplot(data = summary_by_agency)
 
 # map variables to the plot space
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name))
+       aes(area = total_pay, 
+           fill = median_pay, 
+           label = Agency.Name))
 
 # add the chart type
 ## + is layering operator in ggplot. it works kind of like %>% in dplyr
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +  
+       aes(area = total_pay, 
+           fill = median_pay, 
+           label = Agency.Name)) +  
   geom_treemap() 
 
 
-# define some colors
+# add some text on the graphic
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
+       aes(area = total_pay, 
+           fill = median_pay, 
+           label = Agency.Name)) +
   geom_treemap() +
-  geom_treemap_text(colour = "white", grow = TRUE) 
+  geom_treemap_text(colour = "white", 
+                    grow = TRUE) 
 
 # add labels
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
+       aes(area = total_pay, 
+           fill = median_pay, 
+           label = Agency.Name)) +
   geom_treemap() +
-  geom_treemap_text(colour = "white", grow = TRUE) + 
+  geom_treemap_text(colour = "white", 
+                    grow = TRUE) + 
   labs(title = "Public Salaries in NYC", 
-       subtitle = "Median Salary by Agency") 
+       subtitle = "Median Salary by Agency", 
+       fill = "Median Pay") 
 
 # and add a theme
 ## theme information available at https://ggplot2.tidyverse.org/reference/ggtheme.html
 ggplot(data = summary_by_agency, 
-       aes(area = total_pay, fill = median_pay, label = Agency.Name)) +
+       aes(area = total_pay, 
+           fill = median_pay, 
+           label = Agency.Name)) +
   geom_treemap() +
-  geom_treemap_text(colour = "white", grow = TRUE) + 
+  geom_treemap_text(colour = "white", 
+                    grow = TRUE,  
+                    family = "mono") + 
   labs(title = "Public Salaries in NYC", 
-       subtitle = "Median Salary by Agency") +
-  theme_minimal()
+       subtitle = "Median Salary by Agency", 
+       fill = "Median Pay") +
+  theme_minimal(base_family = "mono")
