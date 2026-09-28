@@ -8,15 +8,17 @@ library(tidyverse)    # dependency for tidycensus
 library(tidycensus)   # for Census API
 
 
-# set up with census API
-## I'll once again use the poverty variable that I used prior assignments, plus a few others
+
+# set up with census API --------------------------------------------------
+
+## I'll once again use the poverty variable that I used prior labs, plus a few others
 
 ##sign up for a Census API key at https://api.census.gov/data/key_signup.html
 census_api_key("your key here")
 
 ## find a list of variables here
 ## it includes code, description, sampling population, and finest geographic scale of availability
-variablelist <- load_variables(2023, "acs5", cache = TRUE)
+variablelist <- load_variables(2024, "acs5", cache = TRUE)
 
 ## define a vector with variables of interest
 variables <- c(
@@ -31,7 +33,7 @@ variables <- c(
 data <- get_acs(geography = "county",    # all counties in the US
                 variables = variables,   # all variables defined in the list above
                 output = "wide",         # outputs a table where each row is a county and each column a variable
-                year = 2023)             # or whatever is the most recent year available 
+                year = 2024)             # or whatever is the most recent year available 
 
 
 ## data cleaning to remove unnecessary variables and omit null values
@@ -42,14 +44,17 @@ data <- data %>%
 
 
 
-# Q1: plot & define a research question -----------------------------------
+# Q1: define a question & plot model  -----------------------------------
 
 # In my case: What predicts higher poverty rates in US counties?
 
 # generate scatterplots
 ## create a matrix for analysis
-matrix <- data %>% select(-c(GEOID, NAME))   # drops the variable we don't want to correlate
-matrix <- na.omit(matrix)                # removes rows with null values
+## drops the variable we don't want to correlate
+matrix <- data %>% select(-c(GEOID, NAME))   
+
+## removes rows with null values
+matrix <- na.omit(matrix)                
 
 ## use pairs() to create the visualization
 pairs(matrix, main = "Potential Predictors of Poverty")
@@ -65,12 +70,20 @@ cor.test(data$PovertyRate, data$MedHHIncome)
 
 # Q2: define a regression model, interpret coefficients -------------------
 
-# define the basic mode
-model_1 <- lm(PovertyRate ~ Bachpct + Postgradpct + UnemploymentRate, data = data)  # define the model
-summary(model_1)  # print results
+# define the basic model
+## define the model
+model_1 <- lm(PovertyRate ~ Bachpct + Postgradpct + UnemploymentRate, data = data)  
 
-# add an interaction effect
-model_2 <- lm(PovertyRate ~ Bachpct + Postgradpct + UnemploymentRate + (Bachpct * UnemploymentRate), data = data)
+## print results
+summary(model_1) 
+
+## see all available model info
+names(model_1)
+
+
+# define a model with an interaction effect
+model_2 <- lm(PovertyRate ~ Bachpct + Postgradpct + UnemploymentRate + (Bachpct * UnemploymentRate), 
+              data = data)
 summary(model_2)
 
 
@@ -81,9 +94,15 @@ summary(model_2)
 
 # a forward selection adds predictor variables one at a time 
 ## this version evaluates each iteration based on how the new variables change R2
-forward <- ols_step_forward_r2(model_2) ## generate and save the modeling
-forward  ## print the report
-plot(forward)  ## visualize the change in R2 from one step to the next
+## generate and save the modeling
+forward <- ols_step_forward_r2(model_2) 
+
+## print the report
+forward  
+
+## visualize the change in R2 from one step to the next
+plot(forward)  
+
 
 # a backward selection starts with all variables, then removes them one by one
 backward <- ols_step_backward_r2(model_2)
@@ -94,5 +113,3 @@ plot(backward)
 both <- ols_step_both_r2(model_2)
 both
 plot(both)
-
-
