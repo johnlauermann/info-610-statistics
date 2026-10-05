@@ -2,7 +2,6 @@
 # Lab 7: Chi-squared tests ------------------------------------------------
 
 
-
 ## Explore the Stanford Open Policing Project database of police traffic stops (https://openpolicing.stanford.edu/data/). 
 ## Then pick a location and download the relevant dataset. 
 ## Import to R, so we can run categorical tests.
@@ -13,8 +12,11 @@ setwd("~/Documents/ClassData")  #example for a Mac
 
 
 # here's a method to download data files directly in the script
+## save the URL as a variable
 url <- "https://stacks.stanford.edu/file/druid:yg821jf8611/yg821jf8611_ri_statewide_2020_04_01.rds"
+## use download.file() from base R
 download.file(url = url, destfile = "RI_statewide_2020.rds")
+
 
 
 # load data
@@ -54,7 +56,7 @@ friskbyrace$stdres
 
 # Q4: odds ratios and Fisher test -----------------------------------------
 
-#calculate a simpler race variable, since my machine was crashing 
+# calculate a simpler race variable, since my machine was crashing 
 data$subject_iswhite <- ifelse(data$subject_race == "white", "yes", "no") 
 
 # fisher test will calculate the odds ratio
