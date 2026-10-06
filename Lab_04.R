@@ -18,7 +18,9 @@ poverty <- read.csv("Poverty_2024_ACS5yr.csv") %>%
   select(GEO_ID, S1701_C03_046E) %>%
   ### this was reading as a character for me, so I'm forcing it as numeric
   rename(PovertyRate = S1701_C03_046E) %>%
-  mutate(PovertyRate = as.numeric(PovertyRate))
+  mutate(PovertyRate = as.numeric(PovertyRate)) %>%
+  ### remove the first row, which downloads as labels
+  slice(-1)
 
 ## race data come from variable B02001 (https://data.census.gov/table?q=b02001&g=010XX00US$0500000,$1400000&y=2024)
 race <- read.csv("Race_2024_ACS5yr.csv") %>%
@@ -32,7 +34,8 @@ race <- read.csv("Race_2024_ACS5yr.csv") %>%
          NHPI = B02001_006E,
          Other = B02001_007E,
          TwoOrMore = B02001_008E,
-         White = B02001_002E)
+         White = B02001_002E) %>%
+  slice(-1)
 
 ## calculate racial percentages
 ### one option is to use within()
