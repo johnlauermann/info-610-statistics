@@ -1,8 +1,8 @@
 # Lab 8: logistic regression
 
 library(dplyr)    # data management
-library(haven)    # for reading SPSS data
-library(survey)   # for weigting survey data
+library(haven)    # for reading SPSS files
+library(survey)   # for weighting survey data
 
 
 # load data
@@ -13,12 +13,7 @@ setwd("C:/Users/YourName/Documents/ClassData")  #example for a PC
 setwd("~/Documents/ClassData")  #example for a Mac
 
 # load raw data
-data_raw <- read_spss("C:/Users/johnl/My Drive (jlauerma@pratt.edu)/Teaching/INFO 610 Intro to Statistics/Lessons/11_logistic_regression/W161_Feb25/ATP W161.sav")
-
-# and weight the survey
-data_weighted <- svydesign(ids = ~0,
-                           data = data_raw,
-                           weights = ~WEIGHT_W161)
+data_raw <- read_spss("ATP W161.sav")
 
 
 
@@ -51,7 +46,7 @@ data <- data %>%
 
 
 # Q1: Define and justify your research question ---------------------------
-## In my case, what predicts whether a person is satisifed with direction of the country? 
+## In my case, what predicts whether a person is satisfied with direction of the country? 
 
 # testing correlations, using Spearman's rho b/c Y is categorical
 cor.test(data$SATIS_W161, data$F_AGECAT, method = "spearman")
@@ -63,12 +58,10 @@ cor.test(data$SATIS_W161, data$F_INTFREQ, method = "spearman")
 
 
 
-
 # Q2: define and interpret logistic models with only one variable  --------
 
 ## define my predictors
 predictors <- c("F_AGECAT", "F_GENDER", "F_EDUCCAT", "F_MARITAL", "F_PARTYSUM_FINAL", "F_INTFREQ")
-
 
 ## write a loop to test each predictor
 for (variable in predictors){
@@ -93,7 +86,6 @@ for (variable in predictors){
   print(anova(model, test = "Chisq"))
   
 }
-
 
 
 
