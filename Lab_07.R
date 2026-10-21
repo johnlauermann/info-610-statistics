@@ -40,8 +40,11 @@ table(data$frisk_performed, data$subject_race)
 friskbyrace <- chisq.test(x = data$frisk_performed, 
                           y = data$subject_race, 
                           correct = FALSE)
+## see results
 print(friskbyrace)
-summary(friskbyrace)
+
+## see all attributes of the test
+names(friskbyrace)
 
 
 
