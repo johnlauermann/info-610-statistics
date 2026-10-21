@@ -37,7 +37,9 @@ str(data)
 table(data$frisk_performed, data$subject_race)
 
 ## then the test
-friskbyrace <- chisq.test(data$frisk_performed, data$subject_race, correct = FALSE)
+friskbyrace <- chisq.test(x = data$frisk_performed, 
+                          y = data$subject_race, 
+                          correct = FALSE)
 print(friskbyrace)
 summary(friskbyrace)
 
@@ -59,10 +61,14 @@ friskbyrace$stdres
 # calculate a simpler race variable, since my machine was crashing 
 data$subject_iswhite <- ifelse(data$subject_race == "white", "yes", "no") 
 
+# chi square
+friskbywhite <- chisq.test(data$frisk_performed, data$subject_iswhite)
+
 # fisher test will calculate the odds ratio
 fisher.test(data$frisk_performed, data$subject_iswhite) 
 
 # and the same for a different group
 data$subject_ishispanic <- ifelse(data$subject_race == "hispanic", "yes", "no")
-friskbyhispanic <- chisq.test(data$frisk_performed, data$subject_iswhite)
+friskbyhispanic <- chisq.test(data$frisk_performed, data$subject_ishispanic)
+fisher.test(data$frisk_performed, data$subject_ishispanic)
 
