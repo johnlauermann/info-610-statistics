@@ -14,7 +14,7 @@ census_api_key("your API key")
 
 ## find a list of variables here
 ## it includes code, description, sampling population, and finest geographic scale of availability
-variablelist <- load_variables(2023, "acs5", cache = TRUE)
+variablelist <- load_variables(2024, "acs5", cache = TRUE)
 
 #define vectors with variables
 variables <- c(
@@ -37,23 +37,24 @@ NYdata <- get_acs(geography = "tract",
                 county = NYcounties,
                 variables = variables,
                 output = "wide",
-                year = 2023)
+                year = 2024)
 NJdata <- get_acs(geography = "tract",
                   state = "New Jersey",
                   county = NJcounties,
                   variables = variables,
                   output = "wide",
-                  year = 2023)
-data <- rbind(NYdata, NJdata)  #append on table to the other
+                  year = 2024)
+
+## append one table to the other
+data <- rbind(NYdata, NJdata)  
 
 ##data cleaning to remove unnecessary variables and omit null values
 ls(data)
 str(data)
-data <- data %>% select(-c(B01003_001M, S1501_C02_012M, 
-                           S1701_C03_046M, S2301_C04_001M))  #remove unnecessary columns
-mean(data$PovertyRate) #this won't work because of the NA value in the first tract of Bronx County (aka Rikers Island)
-data <- na.omit(data) #remove NAs
-mean(data$PovertyRate)  #now it works!
+data <- data %>% select(-ends_with("M"))  #remove unnecessary columns
+mean(data$PovertyRate) # this won't work because of the NA value in the first tract of Bronx County (aka Rikers Island)
+data <- na.omit(data) # remove NAs
+mean(data$PovertyRate)  # now it works!
 
 
 
@@ -62,29 +63,35 @@ mean(data$PovertyRate)  #now it works!
 ## for this test, you need two groups. For example, you could use the NY and NJ data frames as separate groups. 
 ## I'm going to create a new grouping variable based on whether a tract is suburban or inner city. 
 
-## create a county column using the NAME string
-data$County <- str_match(data$NAME, ";\\s*(.*?)\\s*;")[,2]
-
 ## create a suburb/central city column
-data$PlaceType <- "Suburb"
-data$PlaceType <- ifelse(grepl("Bronx", data$NAME), "City", data$PlaceType)
-data$PlaceType <- ifelse(grepl("Kings", data$NAME), "City", data$PlaceType)
-data$PlaceType <- ifelse(grepl("New York County", data$NAME), "City", data$PlaceType)
-data$PlaceType <- ifelse(grepl("Queens", data$NAME), "City", data$PlaceType)
-data$PlaceType <- ifelse(grepl("Richmond", data$NAME), "City", data$PlaceType)
+data <- data %>%
+  ## mutate creates a new column
+  mutate(
+    # intially set all to suburb
+    PlaceType = "Suburb", 
+    # then change if the name contains certain words
+    PlaceType = if_else(
+      # | will search for this pattern OR that pattern
+      str_detect(NAME, "Bronx County|Kings County|New York County|Queens County|Richmond County"), 
+      "City", 
+      PlaceType)
+    )
 
-city <- data[data$PlaceType == "City", ]
-suburb <- data[data$PlaceType == "Suburb", ]
+# and filter out two groups
+city <- data %>% 
+  filter(PlaceType == "City")
+suburb <- data %>% 
+  filter(PlaceType == "Suburb")
 
 
 ## check whether the two groups satisfy assumptions for t-tests
 ## see here for a summary of assumptions: https://www.statology.org/t-test-assumptions/
 
 ### are they normally distributed?
-hist(city$PovertyRate, breaks = 100, main = "New York Metro Poverty, 2023", 
+hist(city$PovertyRate, breaks = 100, main = "New York Metro Poverty, 2024", 
      ylab = "Census Tracts", xlab = "Poverty Rate")
-hist(suburb$PovertyRate, breaks = 100, main = "Poverty in the New York Metro, 2023", 
-     ylab = "Census Tracts", xlab = "Poverty Rate", add = TRUE, col = "red")
+hist(suburb$PovertyRate, breaks = 100, main = "Poverty in the New York Metro, 2024", 
+     ylab = "Census Tracts", xlab = "Poverty Rate", col = "red")
 mean(city$PovertyRate)
 median(city$PovertyRate)
 mean(suburb$PovertyRate)
@@ -142,14 +149,25 @@ cohensD(city$Bachpct, suburb$Bachpct)
 #again, you'll need a grouping variable. 
 #In my case, I'm going to subset the five boroughs of NYC, and use each borough as a group. 
 
-city <- subset(data, PlaceType == "City") #just another way to subset out the relevant tracts
+## create a county column using the NAME string
+city <- city %>%
+  mutate(
+    # case_when is like an if_else statement, but for multiple possibilities
+    Borough = case_when(
+      str_detect(NAME, "Bronx County") ~ "Bronx",
+      str_detect(NAME, "Kings County") ~ "Brooklyn",
+      str_detect(NAME, "New York County") ~ "Manhattan",
+      str_detect(NAME, "Queens County") ~ "Queens",
+      str_detect(NAME, "Richmond County") ~ "Staten Island",
+    )
+  )
 
 #configure the ANOVA, with formula main variable ~ group variable
-one.way.poverty <- aov(PovertyRate ~ County, data = city)
+one.way.poverty <- aov(PovertyRate ~ Borough, data = city)
 summary(one.way.poverty)
-one.way.unemployement <- aov(UnemploymentRate ~ County, data = city)
+one.way.unemployement <- aov(UnemploymentRate ~ Borough, data = city)
 summary(one.way.unemployement)
-one.way.bach <- aov(Bachpct ~ County, data = city)
+one.way.bach <- aov(Bachpct ~ Borough, data = city)
 summary(one.way.bach)
 
 #the ANOVA will tell you whether there is a difference across all of the groups,
